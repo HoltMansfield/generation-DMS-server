@@ -7,22 +7,26 @@
     "./dist"
   ],
   "npm-scripts-explained": {
-    "start": "start the app with ts-node - this can be used to attach to a debugger",
+    "start": "Heroku runs this",
+    "start:local": "start the app to run on a dev machine with ts-node - this can be used to attach to a debugger",
     "start:watch": "re-start the app whenever code changes",
     "lint": "lint all ts files in /src folder",
     "lint:watch": "run the lint command when anything within the /src folder changes",
     "lint:fix": "fix all linting issues in all files * use with caution *",
     "build": "transplile TS into es5 in the /dist folder",
+    "postinstall": "Heroku runs this",
     "build:watch": "run the build command when anything within the /src folder changes",
     "_delete-deps": "Deletes node_modules folder, called at the monorepo level with clean"
   },
   "scripts": {
-    "start": "env-cmd -f env/development.env node --inspect=5858 -r ts-node/register --preserve-symlinks ./src/app.ts",
+    "start": "node dist/app.js",
+    "start:local": "env-cmd -f env/development.env node --inspect=5858 -r ts-node/register --preserve-symlinks ./src/app.ts",
     "start:watch": "env-cmd -f env/development.env nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/app.ts",
     "lint": "eslint src/**/*.ts",
     "lint:watch": "watch 'npm run lint' src",
     "lint:fix": "eslint --fix src/**/*.ts",
     "build": "tsc -p .",
+    "postinstall": "tsc -p .",
     "build:watch": "watch 'npm run build' src",
     "_delete-deps": "rm -rf node_modules",
     "nuke": "rm -rf node_modules && rm -rf dist && rm -rf build"
@@ -59,5 +63,8 @@
     "password-hasher": "^1.0.1",
     "pluralize": "^8.0.0",
     "serialize-error": "^5.0.0"
+  },
+  "engines": {
+    "node": "18.11.0"
   }
 }
