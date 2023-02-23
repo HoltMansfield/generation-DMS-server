@@ -14,7 +14,7 @@ export const addDataApiRoutes = (app: Express) => {
     //@ts-expect-error
     if (!req?.session?.userId) {
       res.statusCode = 401
-      return next(new Error('Not Authorized'))
+      return next(new Error('Not Authorized for DMS Access'))
     }
 
     const operation = req.body as MongoOperation
@@ -24,7 +24,7 @@ export const addDataApiRoutes = (app: Express) => {
 
     if (operation.collection === 'users') {
       res.status(401)
-      return next(new Error('Not Authorized'))
+      return next(new Error("Not Authorized for collection 'users' use the userProperties collection"))
     }
 
     const client = getClient()

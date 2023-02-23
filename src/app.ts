@@ -10,7 +10,16 @@ const run = async () => {
 
   // pre-endpoint middleware
   app.use(bodyParser.json())
-  app.use(cookieSession({ secret: 'manny is cool' }))
+  app.use(
+    cookieSession({
+      secret: 'manny is cool',
+      sameSite: 'none',
+      secure: true,
+      domain: 'generation-dms.herokuapp.com',
+      httpOnly: true
+    })
+  )
+
   app.use(
     cors({
       credentials: true,
