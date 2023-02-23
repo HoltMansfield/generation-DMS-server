@@ -23,8 +23,8 @@ const run = async () => {
   // post-endpoint middleware (error handler always last)
   app.use(handleApiError)
 
-  app.listen(4000, () => {
-    console.log('Listening at http://localhost:4000...')
+  app.listen(process.env.PORT, () => {
+    console.log(`Listening at http://localhost:${process.env.PORT}...`)
   })
 }
 
