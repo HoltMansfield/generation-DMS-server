@@ -1,19 +1,6 @@
 import { Express } from 'express'
-import { ObjectId } from 'mongodb'
-import axios from 'axios'
 import bcrypt from 'bcrypt'
-
-const getClient = () => {
-  const client = axios.create({
-    baseURL: `https://data.mongodb-api.com/app/data-eykqb/endpoint/data/v1/action/`,
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': '8xCzOad3SiSyTXC3tdqCF2Ak3KdARPjRVi9Hw8rLQuqVvpBEHbrlhtWD61Y2h1A6'
-    }
-  })
-
-  return client
-}
+import { getClient } from './mongo/get-client'
 
 export const addUserRoutes = (app: Express) => {
   app.post('/users/login', async (req, res, next) => {

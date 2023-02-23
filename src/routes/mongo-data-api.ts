@@ -1,15 +1,5 @@
 import { Express } from 'express'
-import axios from 'axios'
-
-const getClient = () => {
-  return axios.create({
-    baseURL: `https://data.mongodb-api.com/app/data-eykqb/endpoint/data/v1/action/`,
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': '8xCzOad3SiSyTXC3tdqCF2Ak3KdARPjRVi9Hw8rLQuqVvpBEHbrlhtWD61Y2h1A6'
-    }
-  })
-}
+import { getClient } from './mongo/get-client'
 
 interface MongoOperation {
   action: string
@@ -39,9 +29,10 @@ export const addDataApiRoutes = (app: Express) => {
 
     const client = getClient()
     let response
+    const { DATA_SOURCE, DB_NAME } = process.env
 
-    operation.dataSource = 'Cluster0'
-    operation.database = 'wmins'
+    operation.dataSource = DATA_SOURCE
+    operation.database = DB_NAME
 
     try {
       response = await client.post(action, operation)
