@@ -10,7 +10,7 @@ const run = async () => {
 
   // pre-endpoint middleware
   app.use(bodyParser.json())
-  app.use(cookieSession({ secret: 'manny is cool', secure: true, samesite: 'none' }))
+  app.use(cookieSession({ secret: 'manny is cool' }))
 
   app.use(
     cors({
