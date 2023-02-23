@@ -2,13 +2,15 @@ import { Express } from 'express'
 import bcrypt from 'bcrypt'
 import { getClient } from './mongo/get-client'
 
+const { DATA_SOURCE, DB_NAME } = process.env
+
 export const addUserRoutes = (app: Express) => {
   app.post('/users/login', async (req, res, next) => {
     const loginAttempt = req.body
 
     const user = await getClient().post('findOne', {
-      dataSource: 'Cluster0',
-      database: 'wmins',
+      dataSource: DATA_SOURCE,
+      database: DB_NAME,
       collection: 'users',
       filter: { email: loginAttempt.email }
     })
@@ -39,8 +41,8 @@ export const addUserRoutes = (app: Express) => {
     const newUser = req.body
 
     const existingUser = await getClient().post('findOne', {
-      dataSource: 'Cluster0',
-      database: 'wmins',
+      dataSource: DATA_SOURCE,
+      database: DB_NAME,
       collection: 'users',
       filter: { email: newUser.email }
     })
@@ -56,8 +58,8 @@ export const addUserRoutes = (app: Express) => {
     newUser.salt = salt
 
     const result = await getClient().post('insertOne', {
-      dataSource: 'Cluster0',
-      database: 'wmins',
+      dataSource: DATA_SOURCE,
+      database: DB_NAME,
       collection: 'users',
       document: newUser
     })
@@ -72,16 +74,21 @@ export const addUserRoutes = (app: Express) => {
     return res.json(newUser)
   })
 
-  app.get('/users', async (req, res) => {
+  app.get('/users', async (req, res, next) => {
     //@ts-expect-error
     const query = { _id: { $oid: req?.session?.userId } }
+    let user
 
-    const user = await getClient().post('findOne', {
-      dataSource: 'Cluster0',
-      database: 'wmins',
-      collection: 'users',
-      filter: query
-    })
+    try {
+      user = await getClient().post('findOne', {
+        dataSource: DATA_SOURCE,
+        database: DB_NAME,
+        collection: 'users',
+        filter: query
+      })
+    } catch (e) {
+      return next(e)
+    }
 
     delete user?.data?.document?.password
     delete user?.data?.document?.salt
@@ -99,8 +106,8 @@ export const addUserRoutes = (app: Express) => {
     const query = { _id: { $oid: req?.session?.userId } }
 
     const result = await getClient().post('deleteOne', {
-      dataSource: 'Cluster0',
-      database: 'wmins',
+      dataSource: DATA_SOURCE,
+      database: DB_NAME,
       collection: 'users',
       filter: query
     })
