@@ -18,6 +18,7 @@ export const addUserRoutes = (app: Express) => {
     const hashedPassword = await bcrypt.hash(loginAttempt.password, user?.data?.document.salt)
 
     if (hashedPassword !== user?.data?.document.password) {
+      res.status(401)
       return next(new Error('Email or Password are incorrect'))
     }
 
