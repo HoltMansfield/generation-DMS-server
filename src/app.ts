@@ -11,11 +11,16 @@ const run = async () => {
   // pre-endpoint middleware
   app.use(bodyParser.json())
   app.use(cookieSession({ secret: 'manny is cool' }))
-
   app.use(
     cors({
       credentials: true,
-      origin: 'http://localhost:5173'
+      origin: function (origin, callback) {
+        /*
+          Using this function for origin I can support any origin and also use cookies
+          you can't use '*' and cookies
+        */
+        callback(null, true)
+      }
     })
   )
 
