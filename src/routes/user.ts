@@ -35,7 +35,7 @@ export const addUserRoutes = (app: Express) => {
     //@ts-expect-error
     req?.session = null
 
-    return res.status(200).send()
+    return res.json(true)
   })
 
   app.post('/users', async (req, res, next) => {
@@ -49,6 +49,7 @@ export const addUserRoutes = (app: Express) => {
     })
 
     if (existingUser?.data?.document) {
+      res.statusCode = 422
       return next(new Error('Email in use'))
     }
 

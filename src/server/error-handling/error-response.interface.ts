@@ -4,4 +4,5 @@ export interface ErrorResponse {
   error: string
   httpStatusCode: HttpStatus
   message: string | object
+  mongoMessage?: string
 }

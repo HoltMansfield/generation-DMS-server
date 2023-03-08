@@ -18,6 +18,12 @@ export const handleApiError = <T>(error: Error, req: ErrorAwareRequest, res: Res
     message: req.message || 'An error has occurred please try again',
     error: JSON.stringify(serializeError(error))
   }
+  //@ts-expect-error
+  if (error.response.data) {
+    // We get a separate message from MongoDB
+    //@ts-expect-error
+    response.mongoMessage = error.response.data
+  }
 
   res.status(httpStatusCode)
   res.send(JSON.stringify(response))
