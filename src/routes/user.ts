@@ -8,10 +8,19 @@ export const addUserRoutes = (app: Express) => {
   app.post('/users/login', async (req, res, next) => {
     const loginAttempt = req.body
 
+    // Grab the user by email so we can verify the login attempt
     const user = await getClient().post('findOne', {
       dataSource: DATA_SOURCE,
       database: DB_NAME,
       collection: 'users',
+      filter: { email: loginAttempt.email }
+    })
+
+    // Grab the corresponding userProperties document
+    const userProperties = await getClient().post('findOne', {
+      dataSource: DATA_SOURCE,
+      database: DB_NAME,
+      collection: 'userProperties',
       filter: { email: loginAttempt.email }
     })
 
@@ -22,13 +31,18 @@ export const addUserRoutes = (app: Express) => {
       return next(new Error('Email or Password are incorrect'))
     }
 
+    // scrub user object
     delete user?.data?.document.password
     delete user?.data?.document.salt
+    // scrub userProperties object
+    delete userProperties?.data?.document._id
+    delete userProperties?.data?.document.email
 
     //@ts-expect-error
     req.session.userId = user?.data?.document._id
 
-    return res.json(user?.data?.document)
+    // mere user document with userProperties document
+    return res.json({ ...user?.data?.document, userProperties: userProperties?.data?.document })
   })
 
   app.get('/users/logout', async (req, res) => {
@@ -40,6 +54,7 @@ export const addUserRoutes = (app: Express) => {
 
   app.post('/users', async (req, res, next) => {
     const newUser = req.body
+    const newUserProperties = { email: newUser.email }
 
     const existingUser = await getClient().post('findOne', {
       dataSource: DATA_SOURCE,
@@ -59,11 +74,20 @@ export const addUserRoutes = (app: Express) => {
     newUser.password = hashedPassword
     newUser.salt = salt
 
+    // create the user document
     const result = await getClient().post('insertOne', {
       dataSource: DATA_SOURCE,
       database: DB_NAME,
       collection: 'users',
       document: newUser
+    })
+
+    // create the corresponding userProperties document
+    const userPropertiesResult = await getClient().post('insertOne', {
+      dataSource: DATA_SOURCE,
+      database: DB_NAME,
+      collection: 'userProperties',
+      document: newUserProperties
     })
 
     delete newUser.password
@@ -73,13 +97,15 @@ export const addUserRoutes = (app: Express) => {
     //@ts-expect-error
     req.session.userId = newUser._id
 
-    return res.json(newUser)
+    // mere user document with empty userProperties document
+    const merged = { ...newUser, userProperties: {} }
+    return res.json(merged)
   })
 
   app.get('/users', async (req, res, next) => {
     //@ts-expect-error
     const query = { _id: { $oid: req?.session?.userId } }
-    let user
+    let user, userProperties
 
     try {
       user = await getClient().post('findOne', {
@@ -92,10 +118,25 @@ export const addUserRoutes = (app: Express) => {
       return next(e)
     }
 
+    try {
+      userProperties = await getClient().post('findOne', {
+        dataSource: DATA_SOURCE,
+        database: DB_NAME,
+        collection: 'userProperties',
+        filter: { email: user?.data?.document?.email }
+      })
+    } catch (e) {
+      return next(e)
+    }
+
+    // scrub user document
     delete user?.data?.document?.password
     delete user?.data?.document?.salt
+    // scrub userPropertiesDocument
+    delete userProperties?.data?.document?._id
+    delete userProperties?.data?.document?.email
 
-    return res.json(user?.data?.document)
+    return res.json({ ...user?.data?.document, userProperties: userProperties?.data?.document })
   })
 
   app.delete('/users/:userId', async (req, res, next) => {
@@ -119,5 +160,15 @@ export const addUserRoutes = (app: Express) => {
     }
 
     return res.json({ userId: req.params.userId })
+  })
+
+  app.put('/users', async (req, res, next) => {
+    const newUser = req.body
+
+    // destruct just the allowed properties
+
+    // update userProperties with same value from email
+
+    return res.json(newUser)
   })
 }
